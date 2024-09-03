@@ -3,12 +3,12 @@ package com.sanjiv.order_service.service;
 import com.sanjiv.order_service.dto.InventoryResponse;
 import com.sanjiv.order_service.dto.OrderLineItemsDto;
 import com.sanjiv.order_service.dto.OrderRequest;
+import com.sanjiv.order_service.event.OrderPlacedEvent;
 import com.sanjiv.order_service.model.Order;
 import com.sanjiv.order_service.model.OrderLineItems;
 import com.sanjiv.order_service.repository.OrderRepository;
-import io.netty.util.internal.SocketUtils;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -25,6 +25,8 @@ public class OrderService {
     private final OrderRepository orderRepository;
 
     private final WebClient.Builder webClientBuilder;
+
+    private final KafkaTemplate<String, OrderPlacedEvent> kafkaTemplate;
 
     public String placeOrder(OrderRequest orderRequest){
         Order order= new Order();
@@ -70,8 +72,8 @@ public class OrderService {
 //        System.out.println(allProductInStock);
 
         if(allProductInStock){
-            int y= 7;
             orderRepository.save(order);
+            kafkaTemplate.send("notificationTopic", new OrderPlacedEvent(order.getOrderNumber()));
             return  "Order Placed Successfully";
         }else{
             throw new IllegalArgumentException("Product Is Not In Stock");

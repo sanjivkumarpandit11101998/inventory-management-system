@@ -37,15 +37,15 @@ public class OrderController {
         return CompletableFuture.supplyAsync(()->"Oops! Something went wrong, please order after some time~!");
     }
 
-    @GetMapping("/test")
+    @GetMapping
     @ResponseStatus(HttpStatus.CREATED)
     public String test(){
-        String result= webClient.get()
-                .uri("http://localhost:8082/api/inventory/test")
-                .retrieve()
-                .bodyToMono(String.class)
-                .block();
-        return result;
+//        String result= webClient.get()
+//                .uri("http://localhost:8082/api/inventory/test")
+//                .retrieve()
+//                .bodyToMono(String.class)
+//                .block();
+        return "result";
     }
 
 }
